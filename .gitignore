@@ -1,0 +1,5 @@
+.env
+bin/
+node_modules/
+docs/tranche/
+tests/notsosecret.ts

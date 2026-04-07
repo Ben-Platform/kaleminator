@@ -1,0 +1,33 @@
+{
+  "$schema": "https://raw.githubusercontent.com/denoland/deno/main/cli/schemas/config-file.v1.json",
+  "exclude": [
+    "node_modules/"
+  ],
+  "workspace":[ 
+    "./src/apps/*",
+    "./src/services/*",
+    "./src/integrations/*",
+    "./tests/*"
+  ],
+  "nodeModulesDir": "auto",
+  "imports": {
+    "@std/assert": "jsr:@std/assert@^1.0.19",
+    "@std/expect": "jsr:@std/expect@^1.0.18",
+    "@stellar/stellar-sdk": "npm:@stellar/stellar-sdk@^14.6.1/minimal",
+    "effect": "npm:effect@^3.21.0",
+    "oxlint": "npm:oxlint@^1.57.0",
+    "oxlint-tsgo": "npm:oxlint-tsgolint@latest"
+  },
+  "tasks": {
+    "launch": "deno run  --env -A ./src/apps/kaleminator/main.ts",
+    "discord-bot": "deno --env -A ./src/integrations/discord/client.ts",
+    "lint": "deno run -A oxlint --type-aware",
+    "cache-lint": "deno cache oxlint oxlint-tsgo",
+    "test": "deno test -A --env-file"
+  },
+  "fmt": {
+    "useTabs": false,
+    "indentWidth": 4,
+    "lineWidth": 120
+  }
+}
