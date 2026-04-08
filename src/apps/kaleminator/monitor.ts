@@ -1,7 +1,7 @@
 import { Effect, Stream } from "effect";
+import { Keypair, nativeToScVal as toScVal, scValToNative } from "@stellar/stellar-sdk";
+import { getKaleHarvestablePailList, harvest, makeTopicXdr } from "@services/core";
 import { StellarGateway } from "@services/infra";
-import { Keypair, nativeToScVal, scValToNative } from "@stellar/stellar-sdk";
-import { getKaleHarvestablePailList, harvest } from "@services/core";
 
 const BEN_SUBSCRIPTIONS = "GCXCIWH5OS7GJYSFJOWHB3PRBRER3A66O24EKK75MU3QMVQEEN7MYBEN";
 const KALE_ASSET = "KALE:GBDVX4VELCDSQ54KQJYTNHXAHFLBCA77ZY2USQBM4CSHTTV7DME7KALE";
@@ -13,10 +13,10 @@ export const startService = Effect.gen(function* () {
     const gw = yield* StellarGateway; 
 
     const transfer = [
-        nativeToScVal("transfer", { type: "symbol" }).toXDR("base64"), // xdr.ScVal.scvSymbol("transfer").toXDR("base64"),
+        makeTopicXdr(toScVal("transfer", { type: "symbol" })), 
         "*",
-        nativeToScVal(BEN_SUBSCRIPTIONS, { type: "address" }).toXDR("base64"), //xdr.ScVal.scvAddress(Address.fromString(BEN_SUBSCRIPTIONS).toScAddress(),).toXDR("base64"),
-        nativeToScVal(KALE_ASSET, { type: "string" }).toXDR("base64"),
+        makeTopicXdr(toScVal(BEN_SUBSCRIPTIONS, { type: "address" })), 
+        makeTopicXdr(toScVal(KALE_ASSET, { type: "string" })),
     ];
 
     yield* Effect.log(`Monitoring events...`);
