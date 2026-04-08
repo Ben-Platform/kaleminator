@@ -32,6 +32,16 @@ We have empty files that represent placeholders for vNext refactoring and/or add
 # Change to SDK minimal variant
 - Required going into `/node_modules`, and `@stellar/stellar-sdk/lib/minimal/bindings/config.js:7:39`. Then updating `var _package = _interopRequireDefault(require("../../../package.json"));` (one more uplevel ../). Not sure if this is a bug (yet) or something related to using Deno. 
 
+# Installation
+- Git clone into local setup
+- Run `deno install` to install dependencies
+- You need an `.env` file so Deno can load it. There's a provided `.env.sample` that you can rename to `.env`.
+- ALSO: Change/update/add `.env` values as required. You'll need at least `HARVESTER_SECRET` and `AUET_TEST_SECRET`, which are `SDT...` strings (secret for Keypair).
+
+# Testing (and gotchas)
+- If you are using using Visual Studio Code for test runners, note that the Deno/VSCODE extension has a problem with detecting environment variables (it doesn't care for the `--env-file` arg to `deno test`). To solve this, just create a `notsosecret.ts` file at `/tests`  with the missing ENV variables as a fallback. Check the `[your-test-file].test.ts` imports at the top of the test file for the ENV variables you may need to define in the `notsosecret.ts`file. Also, that file is included in .gitignore so it will only reside in your local setup.
+- If you are running via terminal/console, make sure your `.env` file is good to go, and run `deno task tests`. 
+
 
 # stellar-rpc timeout limits (options.go)
 - getHealth (default: 5 seconds)  
