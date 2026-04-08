@@ -317,19 +317,26 @@ const watchContractEventsV0 = (contractId: string, server: rpc.Server, options: 
 
 const monitorContractEventsV1 = (server: rpc.Server, contractId: string, options: WatchEventOptions) => {
     return Stream.unwrap(Effect.gen(function* () {
-        const latestLedger = yield* getLatestLedger(server);
-        const startLedger = options?.startLedger ?? latestLedger.sequence;
+        const { sequence: latestLedger } = yield* getLatestLedger(server);
+        const startLedger = options?.startLedger ?? latestLedger;
 
         const currentLedger = yield* Ref.make(startLedger);
 
         return Stream.repeatEffect(
             Effect.gen(function* () {
                 const fromLedger = yield* Ref.get(currentLedger);
-                const loopLatest = yield* getLatestLedger(server);
+                const { sequence: toLedger } = yield* getLatestLedger(server);
 
-                if (fromLedger > loopLatest.sequence) {
+                if (fromLedger > toLedger) {
                     return Chunk.empty();
                 }
+
+                yield* Effect.log(`Checking ledger`).pipe(
+                    Effect.annotateLogs({ 
+                        toLedger,
+                        fromLedger 
+                    })
+                );
 
                 const response = yield* Effect.tryPromise({
                     try: () => server.getEvents({  // getEvents (rpc default timeout: 10 seconds)
@@ -348,9 +355,10 @@ const monitorContractEventsV1 = (server: rpc.Server, contractId: string, options
                     Effect.tapError((rpcError) => Effect.logError(`RPC failed:`, rpcError.toJSON()))
                 );
 
+                // NOTE: move on to paging token if over +1000 events per ledger
                 const nextLedger = response.events.length > 0
-                    ? response.events[response.events.length - 1].ledger
-                    : loopLatest.sequence + 1;
+                    ? response.events[response.events.length - 1].ledger +1 // +1 due to inclusive
+                    : toLedger + 1;
 
                 yield* Ref.set(currentLedger, nextLedger);
 
