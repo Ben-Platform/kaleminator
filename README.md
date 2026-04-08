@@ -40,7 +40,7 @@ We have empty files that represent placeholders for vNext refactoring and/or add
 
 # Testing (and gotchas)
 - If you are using using Visual Studio Code for test runners, note that the Deno/VSCODE extension has a problem with detecting environment variables (it doesn't care for the `--env-file` arg to `deno test`). To solve this, just create a `notsosecret.ts` file at `/tests`  with the missing ENV variables as a fallback. Check the `[your-test-file].test.ts` imports at the top of the test file for the ENV variables you may need to define in the `notsosecret.ts`file. Also, that file is included in .gitignore so it will only reside in your local setup.
-- If you are running via terminal/console, make sure your `.env` file is good to go, and run `deno task tests`. 
+- If you are running via terminal/console, make sure your `.env` file is good to go, and run `deno task test`. You can also use the `--filter [by]` to run partial test suites (e.g.: `deno task test --filter "env"`).
 
 
 # stellar-rpc timeout limits (options.go)
