@@ -22,6 +22,9 @@ Some names used for Effects, functions, symbols, consts, etc. are intentionally 
 ## About file placeholders
 We have empty files that represent placeholders for vNext refactoring and/or adding context logic. 
 
+## Payment (transfer) detection trigger
+Currently, the monitor detects a payment (`transfer` event) sent to a designated address, and invokes a smart contract function (`harvest`) with params extracted from the event source (which include the payment sender). 
+
 
 # Tech stack
 - Deno 2.x
