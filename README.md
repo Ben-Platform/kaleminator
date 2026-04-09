@@ -3,7 +3,7 @@
 `/apps`
   - **kaleminator**: main application
 
-`/services`: exposes packages `@services/infra`, `@services/core`, `@services@ben-platform`
+`/services`: exposes packages `@services/infra`, `@services/core`, `@services/ben-platform`
   - **infra**: deals with network Stellar-stack, as well as encode/decode xdr.
   - **core**: using infra, deals with KALE contracts and transactions
   - **ben-platform**: using core, adds domain-level logic and primitives for apps to use.
@@ -27,8 +27,8 @@ Currently, the monitor detects a payment (`transfer` event) sent to a designated
 
 
 # Tech stack
-- Deno 2.x
-- Effect v3
+- Deno 2.x (https://deno.com/)
+- Effect v3 (https://effect.website/)
 - @stellar-sdk v14.6, using the **Minimal** variant to avoid Axios.
 
 
