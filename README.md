@@ -1,4 +1,5 @@
-# Architecture
+# Architecture [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/Ben-Platform/kaleminator)
+
 ## Directory break-out
 `/apps`
   - **kaleminator**: main application
