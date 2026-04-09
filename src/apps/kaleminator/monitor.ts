@@ -8,6 +8,8 @@ const KALE_ASSET =  Deno.env.get("KALE_ASSET") ?? "KALE:GBDVX4VELCDSQ54KQJYTNHXA
 const KALE_SAC = Deno.env.get("KALE_SAC") ?? "CB23WRDQWGSP6YPMY4UV5C4OW5CBTXKYN3XEATG7KJEZCXMJBYEHOUOV";
 
 export const startService = Effect.gen(function* () {
+    const HARVESTER = Keypair.fromSecret(Deno.env.get("HARVESTER_SECRET") ?? "NONE");
+
     yield* Effect.log(`Starting Service...`);
 
     const gw = yield* StellarGateway; 
@@ -25,21 +27,31 @@ export const startService = Effect.gen(function* () {
     });
 
     yield* Stream.runForEach(eventStream, (event) => Effect.gen(function* () {
-        yield* Effect.log(`Transfer event detected...`);
+        // event: transfer, [SENDER], [RECEIVER], [ASSET]
+        const [ evType, sender, receiver, asset ] = event.topic.map(scValToNative);
 
-        // event: transfer, [SENDER],...7MYBEN,KALE:GBDVX4VELCDSQ54KQJYTNHXAHFLBCA77ZY2USQBM4CSHTTV7DME7KALE"
-        yield* Effect.log(`event: ${(event.topic.map(topic => scValToNative(topic)))}`);
-
-        const sender = scValToNative(event.topic[1]);
-        yield* Effect.log(`Harvesting KALE for sender: ${sender}`);
+        yield* Effect.log(`Processing ${evType} event`).pipe(
+            Effect.annotateLogs({
+                sender, 
+                receiver, 
+                asset,
+                ledger: event.ledger,
+                tx_hash: event.txHash,
+                amount: scValToNative(event.value),
+            })
+        )
         
         const pails = yield* getKaleHarvestablePailList(sender);
 
         if (pails.length > 0) {
-            yield* Effect.log(`Harvesting ${pails.length} Pails for sender: ${sender}`);
+            yield* Effect.log(`Harvesting Kale`).pipe(
+                Effect.annotateLogs({
+                    subscriber: sender, 
+                    pailCount: pails.length
+                })
+            );
             
-            const signer = Keypair.fromSecret(Deno.env.get("HARVESTER_SECRET") ?? "NONE");
-            const results = yield* harvest(signer,sender, pails);
+            const results = yield* harvest(HARVESTER, sender, pails);
 
             const fmtResults = results
                 .map(result => `{ PailId: ${result.pailId}, Amount: ${result.amount } }`)
