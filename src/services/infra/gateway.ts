@@ -15,7 +15,7 @@ Address,
 import { StellarGateway, type TransferOptions, type WatchEventOptions } from "./stellar-gateway.ts";
 import { StellarHorizon } from "./stellar-horizon.ts";
 import { StellarRpc } from "./stellar-rpc.ts";
-import { AccountNotFoundError, ContractCallSimulationError, ContractNotFoundError, StellarNetworkError, StellarRpcError, TransactionError } from "./errors.ts";
+import { AccountNotFoundError, ContractCallSimulationError, ContractNotFoundError, StellarNetworkError, StellarRpcError, TransactionError, TransactionInsufficientXLMBalance } from "./errors.ts";
 
 export const StellarGatewayLive = Layer.effect( // TODO: experiment with rate-limiting (rpc|horizon scoped resource)
     StellarGateway,
@@ -222,7 +222,7 @@ const submitTransaction = (
                         cause: error
                     })
                 } else if (resultCode === xdr.TransactionResultCode.txInsufficientBalance()) {
-                    return new TransactionError({
+                    return new TransactionInsufficientXLMBalance({
                         message: `insufficient xlm balance to cover fees`, // tx_insufficient_balance
                         cause: error
                     })
@@ -288,7 +288,9 @@ const transferV1 = ( // TODO: move to TransferArgs
     return submitResponse;
 });
 
-// BUG: might skip ledgers as we are always getting the latestLedger per cycle
+/**
+ * @deprecated use `monitorContractEventsV1`
+ */
 const watchContractEventsV0 = (contractId: string, server: rpc.Server, options: WatchEventOptions) =>
     Stream.repeatEffect(
         Effect.gen(function* () {

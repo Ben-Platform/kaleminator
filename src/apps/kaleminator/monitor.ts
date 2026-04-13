@@ -1,5 +1,5 @@
 import { Effect, Stream } from "effect";
-import { Keypair, nativeToScVal as toScVal, scValToNative } from "@stellar/stellar-sdk";
+import { Keypair, nativeToScVal as toScVal, scValToNative as toNative } from "@stellar/stellar-sdk";
 import { getKaleHarvestablePailList, harvest, makeTopicXdr } from "@services/core";
 import { StellarGateway } from "@services/infra";
 
@@ -28,7 +28,7 @@ export const startService = Effect.gen(function* () {
 
     yield* Stream.runForEach(eventStream, (event) => Effect.gen(function* () {
         // event: transfer, [SENDER], [RECEIVER], [ASSET]
-        const [ evType, sender, receiver, asset ] = event.topic.map(scValToNative);
+        const [ evType, sender, receiver, asset ] = event.topic.map(toNative);
 
         yield* Effect.log(`Processing ${evType} event`).pipe(
             Effect.annotateLogs({
@@ -37,7 +37,7 @@ export const startService = Effect.gen(function* () {
                 asset,
                 ledger: event.ledger,
                 tx_hash: event.txHash,
-                amount: scValToNative(event.value),
+                amount: toNative(event.value),
             })
         )
         

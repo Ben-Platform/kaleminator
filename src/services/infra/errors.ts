@@ -1,4 +1,6 @@
 import { Data } from "effect";
+import type { xdr } from "@stellar/stellar-sdk";
+
 import type { TimeoutException } from "effect/Cause";
 
 export class XdrError extends Data.TaggedError("XdrError")<{
@@ -20,7 +22,21 @@ export class AccountNotFoundError extends Data.TaggedError("AccountNotFoundError
     readonly address: string;
     readonly cause: unknown;
 }> {}
-    
+
+export class TransactionInsufficientXLMBalance extends Data.TaggedError("TransactionError")<{
+    readonly message: string;
+    readonly cause: unknown;
+}> {}
+
+export class TransactionInsufficientFee extends Data.TaggedError("TransactionError")<{
+    readonly message: string;
+    readonly cause: unknown;
+}> {}
+
+export type BalanceError = 
+    | TransactionInsufficientFee
+    | TransactionInsufficientXLMBalance
+
 export class TransactionError extends Data.TaggedError("TransactionError")<{
     readonly message: string;
     readonly cause: unknown;
@@ -62,7 +78,17 @@ export type AccountError =
 export type GatewayError =
     | NetworkError
     | AccountError
+    | BalanceError
     | ContractError
     | TransferError
     | TransactionError
     | TimeoutException;
+
+// helpers fn
+export const getErrorName = (result: xdr.TransactionResult): string => {
+    try {
+        return result.result().switch().name;
+    } catch {
+        return "unknown"
+    }
+};

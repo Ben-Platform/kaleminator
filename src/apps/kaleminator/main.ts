@@ -3,7 +3,15 @@ import { MainnetLayer } from "./mainnet.ts";
 import { startService } from "./monitor.ts";
 
 const runnable = startService.pipe(
-    Effect.provide(MainnetLayer)
+    Effect.provide(MainnetLayer),
+    Effect.catchAll((error) => 
+        Effect.logFatal(`Critical Error`).pipe(
+            Effect.annotateLogs({
+                message: error.message, 
+                cause: JSON.stringify(error.cause)
+            })
+        )
+    )
 ); 
 
 const fiber = Effect.runFork(runnable);
